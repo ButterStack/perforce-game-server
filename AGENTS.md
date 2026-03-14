@@ -291,24 +291,114 @@ P4_HOST_PORT=9166 REST_HOST_PORT=9090 docker compose up -d
 
 ## MCP Integration
 
-To use Perforce with Claude Desktop or Claude Code via MCP (Model Context Protocol), you can set up a Perforce MCP server. The MCP server wraps `p4` CLI commands into tool calls that Claude can use directly.
+The official [Perforce P4 MCP Server](https://github.com/perforce/p4mcp-server) lets AI coding assistants (Claude, Cursor, Copilot, etc.) interact with Perforce directly via tool calls — querying files, managing changelists, syncing workspaces, and more.
 
-### Basic MCP Server Configuration
+### Setup
 
-Add to your Claude Desktop config or `.mcp.json`:
+#### 1. Build the MCP server image
+
+```bash
+git clone https://github.com/perforce/p4mcp-server.git
+cd p4mcp-server
+docker build -t p4-mcp .
+```
+
+#### 2. Create a dedicated MCP service account
+
+Don't use `super` for MCP. Create a `background` type user with a long-lived ticket:
+
+```bash
+# Create the mcp-agent user (background type = no password expiry, no interactive login)
+p4 user -o mcp-agent | sed 's/Type: standard/Type: service/' | p4 user -i -f
+
+# Set a password
+printf 'McpAgent123%%\nMcpAgent123%%\n' | p4 -u mcp-agent passwd
+
+# Generate a long-lived ticket (persists across restarts)
+printf 'McpAgent123%%\n' | p4 -u mcp-agent login -p -a
+# Save the ticket hash output — this is what goes in your MCP config
+```
+
+#### 3. Configure your AI assistant
+
+Use the **ticket hash** (not the password) in the `P4PASSWD` field. Perforce accepts tickets anywhere passwords are accepted.
+
+**Claude Code** (`.mcp.json`):
 ```json
 {
   "mcpServers": {
-    "perforce": {
-      "command": "p4",
-      "env": {
-        "P4PORT": "localhost:1666",
-        "P4USER": "super",
-        "P4CLIENT": "my-workspace"
-      }
+    "p4-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "--network", "host",
+        "-e", "P4PORT=localhost:1666",
+        "-e", "P4USER=mcp-agent",
+        "-e", "P4PASSWD=<TICKET_HASH>",
+        "-e", "P4CLIENT=mcp-workspace",
+        "p4-mcp",
+        "python", "-m", "src.main",
+        "--allow-usage",
+        "--toolsets", "files,changelists,shelves,workspaces,jobs"
+      ],
+      "env": {}
     }
   }
 }
 ```
 
-This allows Claude to run `p4` commands as tool calls — syncing files, checking status, submitting changes, and querying the server directly.
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+```json
+{
+  "mcpServers": {
+    "p4-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "--network", "host",
+        "-e", "P4PORT=localhost:1666",
+        "-e", "P4USER=mcp-agent",
+        "-e", "P4PASSWD=<TICKET_HASH>",
+        "-e", "P4CLIENT=mcp-workspace",
+        "p4-mcp",
+        "python", "-m", "src.main",
+        "--allow-usage",
+        "--toolsets", "files,changelists,shelves,workspaces,jobs"
+      ],
+      "env": {}
+    }
+  }
+}
+```
+
+> **Why a service account?** The `service` user type doesn't expire tickets, can't log in interactively, and can be given scoped permissions via the protect table. If the ticket leaks, revoke it with `p4 logout -a mcp-agent` — no password change needed.
+
+### Docker Compose Networking
+
+If your Perforce server runs via Docker Compose, use the Compose network instead of `--network host`:
+
+```bash
+# Replace --network host with:
+--network perforce-game-server_default
+
+# And use the service name for P4PORT:
+-e P4PORT=perforce:1666
+```
+
+### Available Toolsets
+
+| Toolset | What it does |
+|---------|-------------|
+| `files` | List, read, add, edit, delete files in depots |
+| `changelists` | Create, describe, submit changelists |
+| `shelves` | Shelve/unshelve pending changes |
+| `workspaces` | Create and manage client workspaces |
+| `jobs` | Query and manage Perforce jobs |
+
+### Verify MCP Connection
+
+Once configured, your AI assistant should be able to run commands like:
+- "List all depots on the Perforce server"
+- "Show me the files in //depot/..."
+- "Create a new changelist with description 'Update textures'"
+- "What's in changelist 42?"

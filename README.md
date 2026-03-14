@@ -220,7 +220,32 @@ See `examples/ci-triggers/` for ready-to-use trigger scripts:
 
 ## AI Integration
 
-See [AGENTS.md](AGENTS.md) for an LLM-friendly reference that AI coding assistants can use to connect, configure, and operate the Perforce server. Add it to your Claude Code context, Cursor rules, or Copilot instructions.
+Works with the official [Perforce P4 MCP Server](https://github.com/perforce/p4mcp-server) so AI coding assistants (Claude, Cursor, Copilot) can query files, manage changelists, and sync workspaces directly.
+
+Create a dedicated `service` type user for MCP (no password expiry, revocable ticket), then add to your `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "p4-mcp": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i", "--network", "host",
+        "-e", "P4PORT=localhost:1666",
+        "-e", "P4USER=mcp-agent",
+        "-e", "P4PASSWD=<TICKET_HASH>",
+        "-e", "P4CLIENT=mcp-workspace",
+        "p4-mcp",
+        "python", "-m", "src.main",
+        "--allow-usage",
+        "--toolsets", "files,changelists,shelves,workspaces,jobs"
+      ]
+    }
+  }
+}
+```
+
+See [AGENTS.md](AGENTS.md) for the full setup guide — creating the service account, generating tickets, Docker Compose networking, and an LLM-friendly command reference.
 
 ## License
 
