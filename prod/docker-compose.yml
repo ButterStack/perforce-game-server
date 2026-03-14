@@ -1,0 +1,65 @@
+# Perforce Game Server — Production
+# SSL enabled, security level 3. Includes optional Helix Swarm profile.
+# Built by ButterStack — https://butterstack.com
+#
+# Usage:
+#   docker compose up -d                      # Perforce only
+#   docker compose --profile swarm up -d      # Perforce + Helix Swarm
+
+services:
+  perforce:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+      additional_contexts:
+        shared: ../shared
+    ports:
+      - "${P4_HOST_PORT:-1666}:1666"
+      - "${REST_HOST_PORT:-8090}:8090"
+    environment:
+      - P4PORT=1666
+      - P4USER=${P4USER:-super}
+      - P4PASSWD=${P4PASSWD:?P4PASSWD is required for production}
+      - P4REST_PORT=8090
+      - ENGINE=${ENGINE:-unreal}
+      - CASE_INSENSITIVE=${CASE_INSENSITIVE:-1}
+      - UNICODE=${UNICODE:-1}
+      - SSL=${SSL:-1}
+    volumes:
+      - perforce_data:/data
+      - ${SSL_CERT_DIR:-/dev/null}:/data/ssl/custom:ro
+    restart: unless-stopped
+
+  # ============================================================
+  # HELIX SWARM (optional — enable with --profile swarm)
+  # Code review and collaboration for Perforce
+  # ============================================================
+  swarm-redis:
+    image: redis:7-alpine
+    profiles: [swarm]
+    volumes:
+      - swarm_redis_data:/data
+    restart: unless-stopped
+
+  swarm:
+    image: perforce/helix-swarm
+    profiles: [swarm]
+    ports:
+      - "${SWARM_HOST_PORT:-8080}:80"
+    depends_on:
+      - perforce
+      - swarm-redis
+    environment:
+      - SWARM_HOST=${SWARM_HOST:-localhost}
+      - SWARM_PORT=80
+      - P4PORT=perforce:1666
+      - P4USER=${P4USER:-super}
+      - P4PASSWD=${P4PASSWD}
+      - SWARM_REDIS_HOST=swarm-redis
+      - SWARM_REDIS_PORT=6379
+    restart: unless-stopped
+
+volumes:
+  perforce_data:
+  swarm_redis_data:

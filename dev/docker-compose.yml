@@ -1,0 +1,29 @@
+# Perforce Game Server — Development
+# One-command setup: docker compose up
+# Built by ButterStack — https://butterstack.com
+
+services:
+  perforce:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile
+      additional_contexts:
+        shared: ../shared
+    ports:
+      - "${P4_HOST_PORT:-1666}:1666"
+      - "${REST_HOST_PORT:-8090}:8090"
+    environment:
+      - P4PORT=1666
+      - P4USER=${P4USER:-super}
+      - P4PASSWD=${P4PASSWD:-dev123}
+      - P4REST_PORT=8090
+      - ENGINE=${ENGINE:-unreal}
+      - CASE_INSENSITIVE=${CASE_INSENSITIVE:-1}
+      - UNICODE=${UNICODE:-1}
+    volumes:
+      - perforce_data:/data
+    restart: unless-stopped
+
+volumes:
+  perforce_data:

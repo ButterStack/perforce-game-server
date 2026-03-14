@@ -1,0 +1,143 @@
+# Game Dev Common Typemap
+# Shared file type mappings for textures, audio, 3D models, video, and documents.
+# Works with any game engine. Use as a base, then layer engine-specific typemaps on top.
+#
+# Modifier reference:
+#   +l  = exclusive lock (only one user can edit at a time)
+#   +F  = stored as-is, no server compression (for pre-compressed formats)
+#   +S  = only store latest N revisions on server (+S2 = keep 2)
+#   +w  = always writable on client
+#   +x  = executable bit set on client
+#   +C  = server stores compressed (default for binary, explicit here for clarity)
+#
+# Paths use //... so they apply to ALL depots (streams, classic, etc.)
+
+TypeMap:
+    # ============================================================
+    # TEXTURES & IMAGES
+    # Pre-compressed formats: +lF (exclusive lock, no recompression)
+    # ============================================================
+    binary+lF //.../*.png
+    binary+lF //.../*.jpg
+    binary+lF //.../*.jpeg
+    binary+lF //.../*.gif
+    binary+lF //.../*.bmp
+    binary+lF //.../*.tga
+    binary+lF //.../*.tif
+    binary+lF //.../*.tiff
+    binary+lF //.../*.webp
+    binary+lF //.../*.ico
+    binary+lF //.../*.svg
+    binary+lF //.../*.dds
+    binary+lF //.../*.exr
+    binary+lF //.../*.hdr
+    binary+lF //.../*.psd
+    binary+lF //.../*.psb
+    binary+lF //.../*.xcf
+
+    # ============================================================
+    # AUDIO
+    # Compressed audio: +lF (exclusive lock, no recompression)
+    # Raw audio: +l (exclusive lock, server-compressed)
+    # ============================================================
+    binary+lF //.../*.mp3
+    binary+lF //.../*.ogg
+    binary+lF //.../*.wma
+    binary+lF //.../*.aac
+    binary+lF //.../*.flac
+    binary+lF //.../*.opus
+    binary+l  //.../*.wav
+    binary+l  //.../*.aiff
+
+    # ============================================================
+    # VIDEO
+    # All pre-compressed: +lF
+    # ============================================================
+    binary+lF //.../*.mp4
+    binary+lF //.../*.avi
+    binary+lF //.../*.mov
+    binary+lF //.../*.wmv
+    binary+lF //.../*.mkv
+    binary+lF //.../*.webm
+
+    # ============================================================
+    # 3D MODELS & SCENES
+    # Binary formats: +l (exclusive lock, server-compressed)
+    # ============================================================
+    binary+l //.../*.fbx
+    binary+l //.../*.obj
+    binary+l //.../*.blend
+    binary+l //.../*.blend1
+    binary+l //.../*.max
+    binary+l //.../*.ma
+    binary+l //.../*.mb
+    binary+l //.../*.3ds
+    binary+l //.../*.dae
+    binary+l //.../*.abc
+    binary+l //.../*.ztl
+    binary+l //.../*.zpr
+    binary+l //.../*.spp
+    binary+l //.../*.sbsar
+    binary+l //.../*.gltf
+    binary+l //.../*.glb
+
+    # ============================================================
+    # FONTS
+    # ============================================================
+    binary+l //.../*.ttf
+    binary+l //.../*.otf
+    binary+l //.../*.woff
+    binary+l //.../*.woff2
+
+    # ============================================================
+    # ARCHIVES & PACKAGES
+    # Pre-compressed: +lF
+    # ============================================================
+    binary+lF //.../*.zip
+    binary+lF //.../*.rar
+    binary+lF //.../*.7z
+    binary+lF //.../*.gz
+    binary+lF //.../*.tar
+    binary+lF //.../*.bz2
+    binary+lF //.../*.xz
+    binary+lF //.../*.pak
+
+    # ============================================================
+    # DOCUMENTS
+    # Office formats are binary (zip-compressed internally): +lF
+    # ============================================================
+    binary+lF //.../*.pdf
+    binary+lF //.../*.docx
+    binary+lF //.../*.xlsx
+    binary+lF //.../*.pptx
+    binary+lF //.../*.doc
+    binary+lF //.../*.xls
+    binary+lF //.../*.ppt
+
+    # ============================================================
+    # EXECUTABLES & LIBRARIES
+    # +S2w = keep 2 revisions, always writable (saves storage on large binaries)
+    # ============================================================
+    binary+S2w //.../*.exe
+    binary+S2w //.../*.dll
+    binary+S2w //.../*.dylib
+    binary+S2w //.../*.so
+    binary+S2w //.../*.a
+    binary+S2w //.../*.lib
+
+    # ============================================================
+    # DEBUG SYMBOLS
+    # +Sw = keep 1 revision only (massive files, rarely need history)
+    # ============================================================
+    binary+Sw //.../*.pdb
+    binary+Sw //.../*.dSYM
+
+    # ============================================================
+    # SCRIPTS
+    # +x = executable bit
+    # ============================================================
+    text+x //.../*.sh
+    text+x //.../*.bat
+    text+x //.../*.cmd
+    text+x //.../*.command
+    text+x //.../*.ps1

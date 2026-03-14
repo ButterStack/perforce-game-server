@@ -1,0 +1,62 @@
+# ============================================================
+# Perforce Ignore File (.p4ignore)
+# Covers Unreal Engine 5, Unity, and common development files.
+# Copy to your workspace root and set: p4 set P4IGNORE=.p4ignore
+# ============================================================
+
+# ====================
+# OS FILES
+# ====================
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# ====================
+# IDE / EDITOR
+# ====================
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ====================
+# UNREAL ENGINE
+# ====================
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+Build/
+*.VC.db
+*.opensdf
+*.opendb
+*.sdf
+*.cachefile
+*.VC.opendb
+
+# ====================
+# UNITY
+# ====================
+Library/
+Temp/
+Logs/
+obj/
+UserSettings/
+MemoryCaptures/
+Recordings/
+[Aa]ssets/AssetStoreTools*
+
+# ====================
+# BUILD ARTIFACTS
+# ====================
+node_modules/
+__pycache__/
+*.pyc
+.gradle/
+build/
