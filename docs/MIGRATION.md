@@ -24,7 +24,7 @@ services:
     volumes:
       - p4data:/perforce-data
 
-# After (perforce-game-server)
+# After (perforce-docker)
 services:
   perforce:
     build: ./dev

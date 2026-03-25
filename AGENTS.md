@@ -379,7 +379,7 @@ If your Perforce server runs via Docker Compose, use the Compose network instead
 
 ```bash
 # Replace --network host with:
---network perforce-game-server_default
+--network perforce-docker_default
 
 # And use the service name for P4PORT:
 -e P4PORT=perforce:1666

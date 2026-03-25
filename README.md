@@ -1,4 +1,4 @@
-# Perforce Game Server
+# Perforce Docker
 
 **Run a production-ready Perforce server for game dev in 30 seconds.**
 
@@ -144,7 +144,7 @@ SSL_CERT_DIR=/path/to/certs docker compose up -d
 
 ## Comparison
 
-| Feature | perforce-game-server | hawkmoth-studio | Snipe3000 | HaberkornJonas |
+| Feature | perforce-docker | hawkmoth-studio | Snipe3000 | HaberkornJonas |
 |---------|---------------------|-----------------|-----------|----------------|
 | Base OS | Ubuntu 24.04 LTS | CentOS (EOL) | Ubuntu 20.04 | Alpine |
 | p4d version | 2025.2 (latest) | 2020.x | 2023.x | Varies |
@@ -164,7 +164,7 @@ SSL_CERT_DIR=/path/to/certs docker compose up -d
 ## Project Structure
 
 ```
-perforce-game-server/
+perforce-docker/
 ├── dev/                     # Development configuration
 │   ├── Dockerfile           # Fast, no SSL, security=0
 │   ├── docker-compose.yml   # One-command dev setup
